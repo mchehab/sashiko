@@ -184,6 +184,12 @@ lists = ["linux-cxl@vger.kernel.org"]
 reply_to_author = true
 cc = ["linux-cxl@vger.kernel.org"]
 
+[subsystems.linux-media]
+lists = ["linux-media@vger.kernel.org"]
+reply_to_author = true
+description_prefix = ["This is an LLM-generated review that can be prone to hallucinations.\nIt is fine to ignore this review\nWhen in doubt about some of the findings, please consult\nan experienced developer.\n"]
+cc = ["media-ci@linuxtv.org"]
+
 [subsystems.ntb]
 lists = ["ntb@lists.linux.dev"]
 reply_to_author = true
