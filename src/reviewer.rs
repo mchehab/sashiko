@@ -2210,6 +2210,18 @@ impl Reviewer {
             &sender_address,
         );
 
+        let prefix_desc = policy.defaults.description_prefix
+            .as_ref()
+            .and_then(|p| {
+                let s = p.as_str();   // no trimming
+                if s.is_empty() {
+                    None
+                } else {
+                    Some(format!("{}\n", s))
+                }
+            })
+            .unwrap_or_default();
+
         if findings_count == 0 {
             let mut sent_positive_review = false;
             if let EmailAction::Send {
@@ -2276,8 +2288,8 @@ impl Reviewer {
                     };
                     let final_subject = format!("{}{}", subject_prefix, patch_subject);
                     let final_body = format!(
-                        "{}\nSashiko has reviewed this patch and found no issues. It looks great!\n\n-- \nSashiko AI review · {}\n",
-                        body_head, target_url
+                        "{}{}\nSashiko has reviewed this patch and found no issues. It looks great!\n\n-- \nSashiko AI review · {}\n",
+                        prefix_desc, body_head, target_url
                     );
 
                     ctx.db
@@ -2421,7 +2433,7 @@ impl Reviewer {
 
                 footer.push_str(&format!("\n\n-- \nSashiko AI review · {}", target_url));
 
-                let final_body = format!("{}{}{}", header, inline_review.trim_end(), footer);
+                let final_body = format!("{}{}{}{}", prefix_desc, header, inline_review.trim_end(), footer);
 
                 let status = match &ctx.settings.smtp {
                     None => "Disabled",
