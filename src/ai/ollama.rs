@@ -17,7 +17,7 @@
 use crate::ai::token_budget::TokenBudget;
 use crate::ai::{
     AiErrorClass, AiProvider, AiRequest, AiResponse, AiRole, AiUsage, ClassifyAiError,
-    ProviderCapabilities, ToolCall, classify_status_code,
+    AiResponseFormat, ProviderCapabilities, ToolCall, classify_status_code,
 };
 use crate::utils::redact_secret;
 use anyhow::Result;
@@ -291,12 +291,22 @@ fn translate_ollama_request(
         }
     }
 
+
+    // Determine output format: use request's response_format if set, else default to JSON
+    let format = match &request.response_format {
+        Some(AiResponseFormat::Json { schema }) => {
+            serde_json::to_string(schema).unwrap_or_else(|_| "json".to_string())
+        }
+        Some(AiResponseFormat::Text) => "text".to_string(),
+        None => "json".to_string(),
+    };
+
     // Build options with temperature and token limit
     let options = OllamaOptions {
         temperature: request.temperature,
         num_ctx: Some(context_window_size),
         num_predict: Some(max_tokens as i32),
-        format: Some("json".to_string()),
+        format: Some(format),
         think: think_mode,
     };
 
